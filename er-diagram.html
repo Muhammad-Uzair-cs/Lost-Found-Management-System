@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ER Diagram — Lost & Found Management System</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f0f4ff;
+    padding: 32px 24px 48px;
+    color: #1e2535;
+  }
+  h1 {
+    text-align: center;
+    font-size: 1.6rem;
+    margin-bottom: 6px;
+    color: #1a3c5e;
+  }
+  .subtitle {
+    text-align: center;
+    color: #6b7a99;
+    font-size: .9rem;
+    margin-bottom: 32px;
+  }
+  .diagram {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto auto auto;
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .entity {
+    background: #fff;
+    border-radius: 10px;
+    border: 2px solid #dde3ef;
+    box-shadow: 0 2px 12px rgba(0,0,0,.08);
+    overflow: hidden;
+  }
+  .entity-header {
+    padding: 10px 14px;
+    font-weight: 700;
+    font-size: .9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: .01em;
+  }
+  .entity-body {
+    padding: 0;
+  }
+  .attr {
+    padding: 6px 14px;
+    font-size: .8rem;
+    border-top: 1px solid #f0f2f8;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .attr.pk  { font-weight: 700; color: #1a3c5e; background: #f0f5ff; }
+  .attr.fk  { color: #d97706; }
+  .attr.idx { color: #7c3aed; }
+  .pk-badge  { background: #1a3c5e; color: #fff; font-size: .65rem; padding: 1px 5px; border-radius: 3px; font-weight: 700; }
+  .fk-badge  { background: #d97706;  color: #fff; font-size: .65rem; padding: 1px 5px; border-radius: 3px; font-weight: 700; }
+
+  /* Table header colors */
+  .users      .entity-header { background: #1a3c5e; color: #fff; }
+  .locations  .entity-header { background: #065f46; color: #fff; }
+  .categories .entity-header { background: #7c3aed; color: #fff; }
+  .lost-items .entity-header { background: #dc2626; color: #fff; }
+  .found-items .entity-header { background: #16a34a; color: #fff; }
+  .matches    .entity-header { background: #d97706; color: #fff; }
+  .claims     .entity-header { background: #0284c7; color: #fff; }
+  .notifications .entity-header { background: #6b7280; color: #fff; }
+
+  /* Grid placement */
+  .categories  { grid-column: 1; grid-row: 1; }
+  .users       { grid-column: 2; grid-row: 1; }
+  .locations   { grid-column: 3; grid-row: 1; }
+  .notifications { grid-column: 4; grid-row: 1; }
+  .lost-items  { grid-column: 1; grid-row: 2; }
+  .found-items { grid-column: 3; grid-row: 2; }
+  .matches     { grid-column: 2; grid-row: 2; }
+  .claims      { grid-column: 4; grid-row: 2; }
+
+  /* Relationship lines area */
+  .relations-section {
+    max-width: 1100px;
+    margin: 28px auto 0;
+  }
+  .rel-title { font-weight: 700; font-size: 1rem; margin-bottom: 12px; color: #1a3c5e; }
+  .rel-table { width: 100%; border-collapse: collapse; font-size: .85rem; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+  .rel-table th { background: #1a3c5e; color: #fff; padding: 10px 14px; text-align: left; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; }
+  .rel-table td { padding: 9px 14px; border-bottom: 1px solid #f0f2f8; }
+  .rel-table tr:last-child td { border-bottom: none; }
+  .rel-table tr:hover td { background: #f7f9ff; }
+  .cardinality { font-weight: 700; color: #dc2626; font-family: monospace; }
+
+  .legend {
+    max-width: 1100px;
+    margin: 20px auto 0;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: .83rem;
+  }
+  .legend-item { display: flex; align-items: center; gap: 7px; }
+  .legend-dot  { width: 14px; height: 14px; border-radius: 3px; }
+
+  @media print {
+    body { background: #fff; padding: 10px; }
+    .entity { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<h1>🗄️ Entity–Relationship Diagram</h1>
+<p class="subtitle">Lost &amp; Found Management System — University Edition &nbsp;|&nbsp; Normalized to 3NF &nbsp;|&nbsp; MySQL</p>
+
+<!-- ER Diagram Grid -->
+<div class="diagram">
+
+  <!-- CATEGORIES -->
+  <div class="entity categories">
+    <div class="entity-header">🏷️ categories</div>
+    <div class="entity-body">
+      <div class="attr pk"><span class="pk-badge">PK</span> category_id INT UNSIGNED</div>
+      <div class="attr">name VARCHAR(80) UNIQUE</div>
+      <div class="attr">icon VARCHAR(50)</div>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="entity users">
+    <div class="entity-header">👤 users</div>
+    <div class="entity-body">
+      <div class="attr pk"><span class="pk-badge">PK</span> user_id INT UNSIGNED</div>
+      <div class="attr">full_name VARCHAR(100)</div>
+      <div class="attr">email VARCHAR(150) UNIQUE</div>
+      <div class="attr">password VARCHAR(255)</div>
+      <div class="attr">phone VARCHAR(20)</div>
+      <div class="attr">role ENUM(admin, user)</div>
+      <div class="attr">is_active TINYINT(1)</div>
+      <div class="attr">created_at DATETIME</div>
+      <div class="attr">updated_at DATETIME</div>
+    </div>
+  </div>
+
+  <!-- LOCATIONS -->
+  <div class="entity locations">
+    <div class="entity-header">📍 locations</div>
+    <div class="entity-body">
+      <div class="attr pk"><span class="pk-badge">PK</span> location_id INT UNSIGNED</div>
+      <div class="attr">building VARCHAR(100)</div>
+      <div class="attr">room VARCHAR(50)</div>
+      <div class="attr">description VARCHAR(255)</div>
+      <div class="attr">latitude DECIMAL(10,8)</div>
+      <div class="attr">longitude DECIMAL(11,8)</div>
+      <div class="attr">created_at DATETIME</div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div class="entity notifications">
+    <div class="entity-header">🔔 notifications</div>
+    <div class="entity-body">
+      <div class="attr pk"><span class="pk-badge">PK</span> notif_id INT UNSIGNED</div>
+      <div class="attr fk"><span class="fk-badge">FK</span> user_id → users</div>
+      <div class="attr">message TEXT</div>
+      <div class="attr">is_read TINYINT(1)</div>
+      <div class="attr">created_at DATETIME</div>
+    </div>
+  </div>
+
+  <!-- LOST ITEMS -->
+  <div class="entity lost-items">
+    <div class="entity-header">❓ lost_items</div>
+    <div class="entity-body">
+      <div class="attr pk"><span class="pk-badge">PK</span> item_id INT UNSIGNED</div>
+      <div class="attr fk"><span class="fk-badge">FK</span> user_id → users</div>
+      <div class="attr fk"><span class="fk-badge">FK</span> category_id → categories</div>
+      <div class="attr fk"><span class="fk-badge">FK</span> location_id → locations</div>
+      <div class="attr">name VARCHAR(150)</div>
+      <div class="attr">description TEXT</div>
+      <div class="attr">date_lost DATE</div>
+      <div class="attr">image_path VARCHAR(255)</div>
+      <div class="attr idx">status ENUM(open,matched,claimed,closed)</div>
+      <div class="attr">created_at DATETIME</div>
+    </div>
+  </div>
+
+  <!-- MATCHES -->
+  <div class="entity matches">
+    <div class="entity-header">🔗 matches</div>
+    <div class="entity-body">
+      <div class="attr pk"><span class="pk-badge">PK</span> match_id INT UNSIGNED</div>
+      <div class="attr fk"><span class="fk-badge">FK</span> lost_item_id → lost_items</div>
+      <div class="attr fk"><span class="fk-badge">FK</span> found_item_id → found_items</div>
+      <div class="attr">score DECIMAL(5,2)</div>
+      <div class="attr idx">status ENUM(pending,verified,rejected)</div>
+      <div class="attr">matched_at DATETIME</div>
+      <div class="attr fk"><span class="fk-badge">FK</span> verified_by → users</div>
+    </div>
+  </div>
+
+  <!-- FOUND ITEMS -->
+  <div class="entity found-items">
+    <div class="entity-header">📦 found_items</div>
+    <div class="entity-body">
+      <div class="attr pk"><span class="pk-badge">PK</span> item_id INT UNSIGNED</div>
+      <div class="attr fk"><span class="fk-badge">FK</span> user_id → users</div>
+      <div class="attr fk"><span class="fk-badge">FK</span> category_id → categories</div>
+      <div class="attr fk"><span class="fk-badge">FK</span> location_id → locations</div>
+      <div class="attr">name VARCHAR(150)</div>
+      <div class="attr">description TEXT</div>
+      <div class="attr">date_found DATE</div>
+      <div class="attr">image_path VARCHAR(255)</div>
+      <div class="attr idx">status ENUM(open,matched,claimed,closed)</div>
+      <div class="attr">created_at DATETIME</div>
+    </div>
+  </div>
+
+  <!-- CLAIMS -->
+  <div class="entity claims">
+    <div class="entity-header">📋 claims</div>
+    <div class="entity-body">
+      <div class="attr pk"><span class="pk-badge">PK</span> claim_id INT UNSIGNED</div>
+      <div class="attr fk"><span class="fk-badge">FK</span> found_item_id → found_items</div>
+      <div class="attr fk"><span class="fk-badge">FK</span> claimant_id → users</div>
+      <div class="attr">proof_desc TEXT</div>
+      <div class="attr">proof_image VARCHAR(255)</div>
+      <div class="attr idx">status ENUM(pending,approved,rejected)</div>
+      <div class="attr">admin_note TEXT</div>
+      <div class="attr fk"><span class="fk-badge">FK</span> reviewed_by → users</div>
+      <div class="attr">submitted_at DATETIME</div>
+      <div class="attr">reviewed_at DATETIME</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#1a3c5e"></div> PK — Primary Key</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div> FK — Foreign Key</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div> IDX — Indexed column</div>
+</div>
+
+<!-- Relationships Table -->
+<div class="relations-section">
+  <div class="rel-title">📊 Relationships &amp; Cardinalities</div>
+  <table class="rel-table">
+    <thead>
+      <tr><th>Parent Table</th><th>Child Table</th><th>Cardinality</th><th>FK Column</th><th>On Delete</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>users</strong></td><td>lost_items</td><td class="cardinality">1 : N</td><td>user_id</td><td>CASCADE</td><td>One user can report many lost items</td></tr>
+      <tr><td><strong>users</strong></td><td>found_items</td><td class="cardinality">1 : N</td><td>user_id</td><td>CASCADE</td><td>One user can report many found items</td></tr>
+      <tr><td><strong>users</strong></td><td>claims</td><td class="cardinality">1 : N</td><td>claimant_id</td><td>CASCADE</td><td>One user can submit many claims</td></tr>
+      <tr><td><strong>users</strong></td><td>notifications</td><td class="cardinality">1 : N</td><td>user_id</td><td>CASCADE</td><td>One user receives many notifications</td></tr>
+      <tr><td><strong>users</strong></td><td>matches</td><td class="cardinality">1 : N</td><td>verified_by</td><td>SET NULL</td><td>Admin verifies matches</td></tr>
+      <tr><td><strong>categories</strong></td><td>lost_items</td><td class="cardinality">1 : N</td><td>category_id</td><td>RESTRICT</td><td>Category classifies lost items</td></tr>
+      <tr><td><strong>categories</strong></td><td>found_items</td><td class="cardinality">1 : N</td><td>category_id</td><td>RESTRICT</td><td>Category classifies found items</td></tr>
+      <tr><td><strong>locations</strong></td><td>lost_items</td><td class="cardinality">1 : N</td><td>location_id</td><td>RESTRICT</td><td>Where item was lost</td></tr>
+      <tr><td><strong>locations</strong></td><td>found_items</td><td class="cardinality">1 : N</td><td>location_id</td><td>RESTRICT</td><td>Where item was found</td></tr>
+      <tr><td><strong>lost_items</strong></td><td>matches</td><td class="cardinality">1 : N</td><td>lost_item_id</td><td>CASCADE</td><td>A lost item can have multiple match candidates</td></tr>
+      <tr><td><strong>found_items</strong></td><td>matches</td><td class="cardinality">1 : N</td><td>found_item_id</td><td>CASCADE</td><td>A found item can match multiple lost items</td></tr>
+      <tr><td><strong>found_items</strong></td><td>claims</td><td class="cardinality">1 : N</td><td>found_item_id</td><td>CASCADE</td><td>Multiple users can claim the same found item</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Normalization notes -->
+  <div style="margin-top:22px;background:#fff;border-radius:10px;padding:20px 22px;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+    <div style="font-weight:700;font-size:1rem;margin-bottom:12px;color:#1a3c5e;">✅ 3NF Normalization Proof</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;font-size:.83rem;">
+      <div>
+        <div style="font-weight:600;margin-bottom:6px;color:#065f46;">1NF — First Normal Form</div>
+        <ul style="list-style:disc;padding-left:16px;color:#444;line-height:1.9;">
+          <li>All attributes hold atomic values</li>
+          <li>No repeating groups (categories, locations in separate tables)</li>
+          <li>Each table has a primary key</li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-weight:600;margin-bottom:6px;color:#7c3aed;">2NF — Second Normal Form</div>
+        <ul style="list-style:disc;padding-left:16px;color:#444;line-height:1.9;">
+          <li>All in 1NF</li>
+          <li>No partial dependencies (building/room stored in locations, not duplicated in items)</li>
+          <li>Category name not in items table</li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-weight:600;margin-bottom:6px;color:#d97706;">3NF — Third Normal Form</div>
+        <ul style="list-style:disc;padding-left:16px;color:#444;line-height:1.9;">
+          <li>All in 2NF</li>
+          <li>No transitive dependencies</li>
+          <li>User details not stored in items (only FK)</li>
+          <li>Location coordinates not in items table</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
